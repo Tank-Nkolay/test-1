@@ -1,34 +1,82 @@
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { Contact } from 'components/Contact/Contact';
-import { selectContacts, selectFilter } from 'redux/contacts/selectors';
-import { Flex } from '@chakra-ui/react';
+import {
+  selectVisibleContacts,
+  selectPendingStatus,
+} from 'redux/contacts/selectors';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import ContactItem from '../ContactItem';
+import Notification from './Notification';
+import Skeleton from '@mui/material/Skeleton';
 
-export default function ContactList() {
-  const contacts = useSelector(selectContacts);
-  const filter = useSelector(selectFilter);
-
-  const filteredContacts = () => {
-    const normFilter = filter.toLowerCase();
-    return contacts.filter(contact =>
-      contact.name?.toLowerCase()?.includes(normFilter)
-    );
-  };
-  const visibleContacts = filteredContacts();
+const ContactList = () => {
+  const contacts = useSelector(selectVisibleContacts);
+  const pending = useSelector(selectPendingStatus);
 
   return (
-    <ul>
-      <Flex
-        justifyContent="center"
-        gap="10px"
-        wrap="wrap"
-        backgroundColor="#F7FAFC"
+    <Box
+      sx={{
+        width: 500,
+        backgroundColor: 'primary.main',
+        mx: 'auto',
+        borderRadius: 2,
+        p: 2,
+        boxShadow: 5,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+      }}
+    >
+      <Typography
+        variant="h3"
+        sx={{
+          color: 'primary.contrastText',
+          textAlign: 'center',
+          mb: 2,
+        }}
       >
-        {visibleContacts.map(({ id, name, number }) => (
-          <li key={id}>
-            <Contact id={id} name={name} number={number} />
-          </li>
-        ))}
-      </Flex>
-    </ul>
+        Contacts
+      </Typography>
+      {pending && (
+        <Box
+          sx={{
+            mb: 1,
+            textAlign: 'center',
+          }}
+        >
+          <Skeleton
+            animation="wave"
+            variant="rounded"
+            width={400}
+            height={40}
+            sx={{
+              bgcolor: 'primary.light',
+            }}
+          />
+        </Box>
+      )}
+      {!pending && contacts.length === 0 ? (
+        <Notification message="There is no contact in Phonebook" />
+      ) : (
+        <Box
+          component="ul"
+          sx={{
+            listStyle: 'none',
+            m: 0,
+            p: 0,
+            '& > :not(style)': { mb: 1.5 },
+          }}
+        >
+          {contacts.map(({ id, name, number }) => (
+            <Box component="li" key={id}>
+              <ContactItem id={id} name={name} number={number} />
+            </Box>
+          ))}
+        </Box>
+      )}
+    </Box>
   );
-}
+};
+
+export default ContactList;

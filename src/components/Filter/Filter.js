@@ -1,33 +1,35 @@
+import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { filterContacts } from 'redux/contacts/contactsSlice';
+import { changeFilter } from 'redux/contacts/filterSlice';
 import { selectFilter } from 'redux/contacts/selectors';
-import { Input } from '@chakra-ui/react';
-import { Heading, Flex } from '@chakra-ui/react';
+import TextField from '@mui/material/TextField';
 
-export function Filter() {
+const Filter = () => {
   const dispatch = useDispatch();
   const filter = useSelector(selectFilter);
-
-  const onFilterChange = event => {
-    dispatch(filterContacts(event.currentTarget.value));
+  const handleFilterChange = e => {
+    e.preventDefault();
+    const currentFilter = e.currentTarget.value;
+    dispatch(changeFilter(currentFilter));
   };
+
   return (
-    <>
-      <Flex justifyContent="center">
-        <Heading as="h2" size="l">
-          Find contacts
-        </Heading>
-      </Flex>
-      <Flex justifyContent="center" paddingBottom="8px" paddingTop="8px">
-        <Input
-          width="auto"
-          type="text"
-          name="filter"
-          placeholder="Enter search name"
-          value={filter}
-          onChange={onFilterChange}
-        />
-      </Flex>
-    </>
+    <TextField
+      color="accent"
+      label="Filter by name"
+      type="text"
+      autoComplete="off"
+      name="filter"
+      value={filter.value}
+      onChange={handleFilterChange}
+      sx={{
+        width: 300,
+        boxShadow: 2,
+        borderRadius: 1,
+        backgroundColor: 'primary.light',
+      }}
+    />
   );
-}
+};
+
+export default Filter;

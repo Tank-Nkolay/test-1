@@ -1,13 +1,16 @@
 import { Helmet } from 'react-helmet';
-import { RegisterForm } from '../components/RegisterForm/RegisterForm';
+import Box from '@mui/material/Box';
+import RegisterForm from 'components/RegisterForm/RegisterForm';
 
-export default function Register() {
+const Register = () => {
   return (
-    <>
+    <Box sx={{ width: '100%' }}>
       <Helmet>
         <title>Registration</title>
       </Helmet>
       <RegisterForm />
-    </>
+    </Box>
   );
-}
+};
+
+export default Register;

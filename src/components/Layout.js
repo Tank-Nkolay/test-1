@@ -1,21 +1,30 @@
 import { Outlet } from 'react-router-dom';
 import { Suspense } from 'react';
-import { AppBar } from './AppBar/AppBar';
-import { Footer } from './Footer/Footer';
-import { Box, Flex } from '@chakra-ui/react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Container from '@mui/material/Container';
+import Box from '@mui/material/Box';
+import Header from './Header';
+import LinearProgress from '@mui/material/LinearProgress';
 
-export function Layout() {
+const Layout = () => {
   return (
-    <Box display="flex" flexDirection="column" height="100vh">
-      <AppBar />
-      <Suspense fallback={null}>
-        <Outlet />
-      </Suspense>
-      <Box as="footer" bgColor="lightskyblue" width="100%">
-        <Flex justifyContent="center" pt="10px" height="48px">
-          <Footer />
-        </Flex>
+    <Container
+      maxWidth="xl"
+      sx={{
+        bgcolor: 'secondary.light',
+        height: '100vh',
+      }}
+    >
+      <Header />
+      <Box sx={{ width: '100%', pt: 17 }}>
+        <Suspense fallback={<LinearProgress />}>
+          <Outlet />
+        </Suspense>
+        <ToastContainer style={{ minHeight: '70px', borderRadius: '8px' }} />
       </Box>
-    </Box>
+    </Container>
   );
-}
+};
+
+export default Layout;

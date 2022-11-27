@@ -1,104 +1,111 @@
-import { Field, Formik } from 'formik';
+import { useDispatch } from 'react-redux';
+import { useFormik } from 'formik';
 import * as yup from 'yup';
-import {
-  Box,
-  Button,
-  Flex,
-  FormControl,
-  FormLabel,
-  FormErrorMessage,
-  Input,
-  VStack,
-} from '@chakra-ui/react';
-
-import Notiflix from 'notiflix';
-
-import {
-  useDispatch,
-  // useSelector
-} from 'react-redux';
+import { toast } from 'react-toastify';
 import { logIn } from 'redux/auth/operations';
-// import { selectError } from 'redux/auth/selectors';
+import { toastOptions } from 'utils/toastOptions';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Box from '@mui/material/Box';
 
 let schema = yup.object().shape({
-  email: yup.string().email().required('Please, enter email'),
+  email: yup
+    .string('Enter your email')
+    .email('Enter a valid email')
+    .required('Email is required'),
   password: yup
-    .string()
-    .required('No password provided.')
-    .min(6, 'Password is too short - should be 6 chars minimum.')
-    .matches(/[a-zA-Z]/, 'Password can only contain Latin letters.'),
+    .string('Enter your password')
+    .min(7, 'Password should be of minimum 7 characters length')
+    .required('Password is required'),
 });
 
-export function LoginForm() {
+const LoginForm = () => {
   const dispatch = useDispatch();
-  // const error = useSelector(selectError);
 
-  //  function handleFormSubmit(values) {
-  //    dispatch(logIn(values));
-  // }
-
-  const handleFormSubmit = async (values, { resetForm }) => {
-    const { error } = await dispatch(logIn(values));
+  const handleSubmit = async (values, { resetForm }) => {
+    const { error } = await dispatch(
+      logIn({
+        email: values.email.trim(),
+        password: values.password.trim(),
+      })
+    );
     if (!error) {
       resetForm();
-      Notiflix.Notify.success('You are logged in');
+      toast.success(`You have successfully Log In`, toastOptions);
       return;
     }
-    Notiflix.Notify.failure(`Something went wrong, please check your data`);
+    toast.error(
+      `An error has occurred, please check the information you entered.`,
+      toastOptions
+    );
   };
 
-  return (
-    <Flex bg="gray.100" align="center" justify="center" h="100vh">
-      <Box bg="white" p={6} rounded="md">
-        <Formik
-          initialValues={{
-            email: '',
-            password: '',
-          }}
-          validationSchema={schema}
-          onSubmit={handleFormSubmit}
-        >
-          {({ handleSubmit, errors, touched }) => (
-            <form onSubmit={handleSubmit}>
-              <VStack spacing={4} align="flex-start">
-                <FormControl
-                  isRequired
-                  isInvalid={!!errors.email && touched.email}
-                >
-                  <FormLabel htmlFor="email">Email</FormLabel>
-                  <Field
-                    as={Input}
-                    id="email"
-                    name="email"
-                    type="email"
-                    variant="filled"
-                    placeholder="Enter email"
-                  />
-                </FormControl>
-                <FormControl
-                  isRequired
-                  isInvalid={!!errors.password && touched.password}
-                >
-                  <FormLabel htmlFor="password">Password</FormLabel>
-                  <Field
-                    as={Input}
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="Enter password"
-                    variant="filled"
-                  />
-                  <FormErrorMessage>{errors.password}</FormErrorMessage>
-                </FormControl>
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    validationSchema: schema,
+    onSubmit: handleSubmit,
+  });
 
-                <Button type="submit" colorScheme="purple" width="full">
-                  Log In
-                </Button>
-              </VStack>
-            </form>
-          )}
-        </Formik>
-      </Box>
-    </Flex>
+  return (
+    <Box
+      component="form"
+      onSubmit={formik.handleSubmit}
+      sx={{
+        width: 500,
+        backgroundColor: 'primary.main',
+        mx: 'auto',
+        borderRadius: 2,
+        p: 2,
+        boxShadow: 5,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        '& > :not(style)': { m: 1.5 },
+      }}
+    >
+      <TextField
+        id="email"
+        color="accent"
+        name="email"
+        label="Email"
+        autoComplete="off"
+        value={formik.values.email}
+        onChange={formik.handleChange}
+        error={formik.touched.email && Boolean(formik.errors.email)}
+        helperText={formik.touched.email && formik.errors.email}
+        sx={{
+          width: 400,
+          boxShadow: 2,
+          borderRadius: 1,
+          backgroundColor: 'primary.light',
+        }}
+      />
+      <TextField
+        id="password"
+        color="accent"
+        name="password"
+        label="Password"
+        type="password"
+        autoComplete="off"
+        value={formik.values.password}
+        onChange={formik.handleChange}
+        error={formik.touched.password && Boolean(formik.errors.password)}
+        helperText={formik.touched.password && formik.errors.password}
+        sx={{
+          width: 400,
+          boxShadow: 2,
+          borderRadius: 1,
+          backgroundColor: 'primary.light',
+        }}
+      />
+      <Button color="primary" variant="contained" type="submit">
+        Log in
+      </Button>
+    </Box>
   );
-}
+};
+
+export default LoginForm;

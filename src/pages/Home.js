@@ -1,27 +1,38 @@
-import { Image } from '@chakra-ui/react';
+import { Helmet } from 'react-helmet';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
-import image from '../images/book-g8daf5d1f8_640.png';
-const styles = {
-  container: {
-    height: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontWeight: 500,
-    fontSize: 28,
-    textAlign: 'center',
-    marginBottom: '8px',
-  },
+const Home = () => {
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Helmet>
+        <title>Phonebook</title>
+      </Helmet>
+      <Box
+        sx={{
+          width: 800,
+          backgroundColor: 'primary.main',
+          mx: 'auto',
+          borderRadius: 2,
+          alignItems: 'center',
+          p: 2,
+          borderColor: 'primary.dark',
+          boxShadow: 5,
+        }}
+      >
+        <Typography
+          variant="h2"
+          component="h4"
+          sx={{
+            textAlign: 'center',
+            color: 'primary.contrastText',
+          }}
+        >
+          To access your phonebook,<br></br> please login or register
+        </Typography>
+      </Box>
+    </Box>
+  );
 };
 
-export default function Home() {
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>PhoneBook</h1>
-      <Image src={image} alt="img" objectFit="cover" width="500px" />
-    </div>
-  );
-}
+export default Home;

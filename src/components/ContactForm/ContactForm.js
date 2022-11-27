@@ -1,8 +1,10 @@
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { toast } from 'react-toastify';
-import { register } from 'redux/auth/operations';
+import { selectContacts } from 'redux/contacts/selectors';
+import { addContact } from 'redux/contacts/operations';
 import { toastOptions } from 'utils/toastOptions';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -10,34 +12,41 @@ import Box from '@mui/material/Box';
 
 let schema = yup.object().shape({
   name: yup
-    .string('Enter your email')
-    .min(3, 'Name must be at least 3 characters long!')
-    .max(32, 'Name must be less than 32 characters long')
+    .string('Enter contact name')
+    .matches(
+      /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/,
+      'Name may contain only letters, apostrophe, dash and spaces without spaces at the beginning and end of the name'
+    )
     .required('Name is required'),
-  email: yup
-    .string('Enter your email')
-    .email('Enter a valid email')
-    .required('Email is required'),
-  password: yup
-    .string('Enter your password')
-    .min(7, 'Password should be of minimum 7 characters length')
-    .required('Password is required'),
+  number: yup
+    .string('Enter phone number')
+    .matches(
+      /\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/,
+      'Phone number must be digits and can contain spaces, dashes, parentheses and can start with +'
+    )
+    .required('Phone number is required'),
 });
 
-const RegisterForm = () => {
+const ContactForm = () => {
   const dispatch = useDispatch();
+  const contacts = useSelector(selectContacts);
 
   const handleSubmit = async (values, { resetForm }) => {
-    const { error } = await dispatch(
-      register({
-        name: values.name.trim(),
-        email: values.email.trim(),
-        password: values.password.trim(),
-      })
-    );
+    const findContactByName = (array, newName) => {
+      return array.find(({ name }) => name.toLowerCase() === newName);
+    };
+
+    const { name } = values;
+    const normalizedName = name.toLowerCase().trim();
+
+    if (findContactByName(contacts, normalizedName)) {
+      toast.error(`${name} is already in contacts`, toastOptions);
+      return;
+    }
+    const { error } = await dispatch(addContact(values));
     if (!error) {
       resetForm();
-      toast.success(`You have successfully registered`, toastOptions);
+      toast.success(`New contact has been successfully added`, toastOptions);
       return;
     }
     toast.error(
@@ -45,12 +54,10 @@ const RegisterForm = () => {
       toastOptions
     );
   };
-
   const formik = useFormik({
     initialValues: {
       name: '',
-      email: '',
-      password: '',
+      number: '',
     },
     validationSchema: schema,
     onSubmit: handleSubmit,
@@ -61,7 +68,7 @@ const RegisterForm = () => {
       component="form"
       onSubmit={formik.handleSubmit}
       sx={{
-        width: 500,
+        width: 400,
         backgroundColor: 'primary.main',
         mx: 'auto',
         borderRadius: 2,
@@ -78,58 +85,42 @@ const RegisterForm = () => {
         color="accent"
         name="name"
         label="Name"
+        type="text"
         autoComplete="off"
         value={formik.values.name}
         onChange={formik.handleChange}
         error={formik.touched.name && Boolean(formik.errors.name)}
         helperText={formik.touched.name && formik.errors.name}
         sx={{
-          width: 400,
+          width: 300,
           boxShadow: 2,
           borderRadius: 1,
           backgroundColor: 'primary.light',
         }}
       />
       <TextField
-        id="email"
+        id="number"
         color="accent"
-        name="email"
-        label="Email"
+        name="number"
+        label="Number"
+        type="tel"
         autoComplete="off"
-        value={formik.values.email}
+        value={formik.values.number}
         onChange={formik.handleChange}
-        error={formik.touched.email && Boolean(formik.errors.email)}
-        helperText={formik.touched.email && formik.errors.email}
+        error={formik.touched.number && Boolean(formik.errors.number)}
+        helperText={formik.touched.number && formik.errors.number}
         sx={{
-          width: 400,
-          boxShadow: 2,
-          borderRadius: 1,
-          backgroundColor: 'primary.light',
-        }}
-      />
-      <TextField
-        id="password"
-        color="accent"
-        name="password"
-        label="Password"
-        type="password"
-        autoComplete="off"
-        value={formik.values.password}
-        onChange={formik.handleChange}
-        error={formik.touched.password && Boolean(formik.errors.password)}
-        helperText={formik.touched.password && formik.errors.password}
-        sx={{
-          width: 400,
+          width: 300,
           boxShadow: 2,
           borderRadius: 1,
           backgroundColor: 'primary.light',
         }}
       />
       <Button color="primary" variant="contained" type="submit">
-        Register
+        Add contact
       </Button>
     </Box>
   );
 };
 
-export default RegisterForm;
+export default ContactForm;
